@@ -71,7 +71,6 @@ def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     except Exception as e:
         logger.error('Unexpected error during preprocessing: %s', e)
         raise
-
 def save_data(train_data: pd.DataFrame, test_data: pd.DataFrame, data_path: str) -> None:
     """Save the train and test datasets."""
     try:
@@ -86,9 +85,8 @@ def save_data(train_data: pd.DataFrame, test_data: pd.DataFrame, data_path: str)
 
 def main():
     try:
-        # params = load_params(params_path='params.yaml')
-        # test_size = params['data_ingestion']['test_size']
-        test_size = 0.2
+        params = load_params(params_path='params.yaml')
+        test_size = params['data_ingestion']['test_size']
         data_path = 'https://github.com/kumar7ashutosh/datasets/raw/refs/heads/main/spam.csv'
         df = load_data(data_url=data_path)
         final_df = preprocess_data(df)
@@ -99,5 +97,4 @@ def main():
         print(f"Error: {e}")
 
 if __name__ == '__main__':
-    main()
-    
+    main()    
