@@ -85,10 +85,19 @@ stages:
       size: 855684
     - path: src/model_evaluation.py
       hash: md5
-      md5: d5549ee2400b541af653bb521ca3857b
-      size: 4203
+      md5: 73a64ed28459a684c4875097fde3126a
+      size: 4246
     outs:
+    - path: dvclive/metrics.json
+      hash: md5
+      md5: 3feef7419ffb9c64835f8cec871b8d66
+      size: 147
+    - path: dvclive/plots/metrics
+      hash: md5
+      md5: 97e630dc3839dfbc3f3b60b9c11c5617.dir
+      size: 142
+      nfiles: 4
     - path: reports/metrics.json
       hash: md5
-      md5: 49a3e0b3cfdcc6fb014545f17efa7727
+      md5: 5a9ba1118986fdab44cc451a96496506
       size: 145

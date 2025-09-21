@@ -73,14 +73,16 @@ def load_data(file_path:str)->pd.DataFrame:
         logger.error('Unexpected error occurred while loading the data: %s', e)
         raise
 
-def evaluate_model(clf,x_test:np.ndarray,y_test:np.ndarray)->dict:
+def evaluate_model(clf, x_test: np.ndarray, y_test: np.ndarray) -> dict:
     try:
-        y_pred=clf.predict(x_test)
-        y_predict_proba=clf.predict_proba(x_test)[:,1]
-        accuracy=accuracy_score(y_test,y_pred)
-        precision=precision_score(y_test,y_pred)
-        recall=precision_score(y_test,y_pred)
-        auc_score=roc_auc_score(y_test,y_predict_proba)
+        y_pred = clf.predict(x_test)
+        y_predict_proba = clf.predict_proba(x_test)[:, 1]
+
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred)
+        recall = recall_score(y_test, y_pred)
+        auc_score = roc_auc_score(y_test, y_predict_proba)
+
         metrics_dict = {
             'accuracy': accuracy,
             'precision': precision,
@@ -88,10 +90,11 @@ def evaluate_model(clf,x_test:np.ndarray,y_test:np.ndarray)->dict:
             'auc': auc_score
         }
         logger.debug('Model evaluation metrics calculated')
-        return metrics_dict
+        return metrics_dict, y_pred, y_predict_proba
     except Exception as e:
         logger.error('Error during model evaluation: %s', e)
         raise
+
 def main():
     try:
         params = load_params(params_path='params.yaml')
@@ -99,17 +102,22 @@ def main():
         test_data=load_data('./data/processed/test_tfidf.csv')
         x_test=test_data.iloc[:,:-1].values
         y_test=test_data.iloc[:,-1].values
-        metrics=evaluate_model(clf,x_test=x_test,y_test=y_test)
-        with Live(save_dvc_exp=True) as live:
-            live.log_metric('accuracy', accuracy_score(y_test, y_test))
-            live.log_metric('precision', precision_score(y_test, y_test))
-            live.log_metric('recall', recall_score(y_test, y_test))
+        metrics, y_pred, y_proba = evaluate_model(clf, x_test, y_test)
 
+        # Log with dvclive
+        with Live() as live:
+            for k, v in metrics.items():
+                live.log_metric(k, v)
             live.log_params(params)
-        eval_path=os.path.join('reports','metrics.json')
-        os.makedirs(os.path.dirname(eval_path),exist_ok=True)
-        with open(eval_path,'w') as file:
-            json.dump(metrics,file,indent=4)
+
+        # Save also to reports/metrics.json
+        eval_path = os.path.join('reports', 'metrics.json')
+        os.makedirs(os.path.dirname(eval_path), exist_ok=True)
+        with open(eval_path, 'w') as file:
+            json.dump(metrics, file, indent=4)
+
+        logger.debug("Metrics saved successfully")
+
     except Exception as e:
         logger.error('Failed to complete the model evaluation process: %s', e)
         print(f"Error: {e}")
